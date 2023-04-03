@@ -29,14 +29,14 @@ module.exports = {
 
     if (!channel || channel.id !== latestSetVerificar.channelId) {
         const embed2 = new EmbedBuilder()
-          .setColor("BLUE")
+          .setColor(0x000FF)
           .setDescription(":x: Não foi possível remover o canal, certifique-se que menciona o canal que está definido como canal de verificaçao.");
         return interaction.reply({ embeds: [embed2.toJSON()], ephemeral: true });
     }
 
     await SetVerificar.deleteOne();
     const embed = new EmbedBuilder()
-      .setColor("BLUE")
+      .setColor(0x000FF)
       .setDescription(":white_check_mark: O teu canal de verificao foi removido.");
     return interaction.reply({ embeds: [embed.toJSON()], ephemeral: true });
   },

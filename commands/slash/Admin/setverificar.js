@@ -64,7 +64,7 @@ module.exports = {
     const guildId = interaction.guildId;
     const channelId = channel.id;
     const roleId = role.id;
-  
+
     console.log(`ID do servidor: ${guildId}`);
     console.log(`ID do canal de verificação: ${channelId}`);
     console.log(`ID do cargo de usuários verificados: ${roleId}`);

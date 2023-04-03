@@ -30,7 +30,6 @@ module.exports = (client) => {
 		// Quando a conexão é estabelecida, realiza algumas verificações
 		mongoose.connection.once("open", async () => {
 			console.log("[DATABASE🍃] Conectado ao MongoDB com sucesso!".brightGreen);
-
 			// Verifica o último canal definido para o comando "SetEntrada"
 			try {
 				const latestSetEntrada = await SetEntrada.findOne();
@@ -67,12 +66,15 @@ module.exports = (client) => {
 					const setVerificarGuildId = latestSetVerificar.guildId;
 					const setVerificarChannelId = latestSetVerificar.channelId;
 					const setVerificarRoleId = latestSetVerificar.roleId;
-					
+					const verifiedRole = setVerificarRoleId;
+					module.exports = verifiedRole;
+					console.log(verifiedRole);
+
 					// Imprime no console as informações extraídas
 					console.log(`SetVerificar Guild ID: ${setVerificarGuildId}`)
 					console.log(`SetVerificar channel ID: ${setVerificarChannelId}`);
 					console.log(`SetVerificar role ID: ${setVerificarRoleId}`);
-			
+					
 					// Procura o objeto "guild" (servidor) correspondente a "setVerificarGuildId"
 					const guild = client.guilds.cache.get(setVerificarGuildId);
 			
@@ -80,7 +82,7 @@ module.exports = (client) => {
 					if (guild) {
 						// Procura o objeto "role" (papel) correspondente a "setVerificarRoleId" dentro do servidor "guild"
 						const role = guild.roles.cache.get(setVerificarRoleId);
-			
+		
 						// Verifica se "role" existe
 						if (!role) {
 							console.error(`SetVerificar role ID "${setVerificarRoleId}" não encontrado nas roles do servidor`);
@@ -96,7 +98,7 @@ module.exports = (client) => {
 			
 					// Procura o objeto "role" (papel) correspondente a "setVerificarRoleId" dentro do servidor "guild"
 					const role = guild.roles.cache.get(setVerificarRoleId);
-			
+	
 					// Verifica se "channel" existe
 					if (!channel) {
 						console.error(`SetVerificar channel ID "${setVerificarChannelId}" não encontrado nos canais do servidor`);
@@ -114,7 +116,6 @@ module.exports = (client) => {
 			} catch (err) {
 				console.error('Erro ao recuperar o ID do canal de verificação e o ID da role do banco de dados', err);
 			  }
-			  
 		})
 	}
 }

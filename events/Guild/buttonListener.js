@@ -1,10 +1,15 @@
 const client = require("../../index");
 const config = require("../../config/config.js");
-const { EmbedBuilder } = require("discord.js"); // Importa a classe EmbedBuilder da biblioteca discord.js.
+const { EmbedBuilder, ButtonInteraction  } = require("discord.js"); // Importa a classe EmbedBuilder da biblioteca discord.js.
+
 
 module.exports = { // Exporta um objeto que contém o nome do evento e a função executada quando o evento ocorre.
   name: "buttonListener",
-    }
+    
+/** 
+    @param {ButtonInteraction} interaction
+*/
+}
     // Define a função que será executada quando o evento ocorrer.
     client.on('interactionCreate', async (interaction) => {
       if (interaction.isButton()) {
@@ -25,7 +30,7 @@ module.exports = { // Exporta um objeto que contém o nome do evento e a funçã
       console.log(`O botão ${interaction.customId} é indefinido.`);
       return;
     }
-
+    
     if (button.permission && !interaction.member.permissions.has(button.permission)) { // Verifica se o botão requer permissão e se o membro que interagiu possui essa permissão. Se não, responde com uma mensagem de erro.
       console.log(`O usuário ${interaction.user.tag} não tem permissão para usar o botão ${interaction.customId}.`);
       return interaction.reply({ embeds: [ new EmbedBuilder().setDescription( `⛔ | You don't have the required permissions to use this.`).setColor("#f8312f") ], ephemeral: true });
