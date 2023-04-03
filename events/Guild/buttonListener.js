@@ -2,7 +2,6 @@ const client = require("../../index");
 const config = require("../../config/config.js");
 const { EmbedBuilder } = require("discord.js"); // Importa a classe EmbedBuilder da biblioteca discord.js.
 
-
 module.exports = { // Exporta um objeto que contém o nome do evento e a função executada quando o evento ocorre.
   name: "buttonListener",
     }

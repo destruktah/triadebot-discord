@@ -37,6 +37,7 @@ async function loadButtons(client) {
 
     // Exibe o nome do arquivo que foi carregado
     console.log(`Loaded button file: ${file}`);
+    console.log(table.toString())
     
   })
 }
