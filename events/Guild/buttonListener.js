@@ -2,10 +2,13 @@ const client = require("../../index");
 const config = require("../../config/config.js");
 const { EmbedBuilder } = require("discord.js"); // Importa a classe EmbedBuilder da biblioteca discord.js.
 
+
 module.exports = { // Exporta um objeto que contém o nome do evento e a função executada quando o evento ocorre.
-  
   name: "buttonListener",
-  async execute(interaction, client) { // Define a função que será executada quando o evento ocorrer.
+    }
+    // Define a função que será executada quando o evento ocorrer.
+    client.on('interactionCreate', async (interaction) => {
+      if (interaction.isButton()) {
     console.log(`Botão ${interaction.customId} pressionado pelo usuário ${interaction.user.tag}`);
     if (!interaction.isButton()) {
       console.log(`A interação não é um botão.`);
@@ -35,5 +38,5 @@ module.exports = { // Exporta um objeto que contém o nome do evento e a funçã
     }
 
     button.execute(interaction, client); // Executa a função correspondente ao botão.
-  },
-};
+  }
+});

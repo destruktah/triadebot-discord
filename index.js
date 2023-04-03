@@ -1,7 +1,7 @@
 const { Client, Partials, Collection, GatewayIntentBits, EmbedBuilder, Events, ButtonInteraction } = require('discord.js');
 const config = require('./config/config');
 const colors = require("colors");
-const { loadButtons } = require('./handlers/buttonHandler');
+const  loadButtons  = require('./handlers/buttonHandler');
 require('dotenv').config();
 
 // Criando o client:
@@ -65,7 +65,7 @@ module.exports = client;
 loadButtons(client);
 
 
-["prefix", "application-commands", "events", "mongoose"].forEach((file) => {
+["prefix", "application-commands", "events", "mongoose", "buttonHandler"].forEach((file) => {
     require(`./handlers/${file}`)(client, config);
 });
 

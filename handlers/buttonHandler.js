@@ -5,7 +5,7 @@ const ascii = require('ascii-table');
 async function loadButtons(client) {
   // Cria uma nova instância de ascii-table com o título "Buttons List"
   const table = new ascii('Buttons List');
-
+  
   // Obtém o caminho completo da pasta "buttons"
   const buttonsFolder = path.join(__dirname, '../buttons');
 
@@ -40,4 +40,4 @@ async function loadButtons(client) {
     
   })
 }
-module.exports = { loadButtons };
+module.exports = loadButtons ;

@@ -108,32 +108,6 @@ module.exports = (client) => {
 						console.error(`SetVerificar role ID "${setVerificarRoleId}" não encontrado nas roles do servidor`);
 						return;
 					}
-			
-					// Apaga todas as mensagens do canal "channel" que foram enviadas pelo bot
-					await channel.messages.fetch().then(messages => {
-						messages.forEach(msg => {
-							if (msg.author.id === client.user.id) {
-								msg.delete().catch(console.error);
-							}
-						});
-					});
-
-				  await SetVerificar.findOneAndUpdate({}, { channel, role });
-			  
-				  // Envia a nova mensagem com o botão de verificação
-				  const verifyEmbed = new EmbedBuilder()
-					.setTitle("Verificação")
-					.setDescription('Clica no botão abaixo para verificar a tua conta e conseguires acesso ao servidor')
-					.setColor(0x5fb041);
-			  
-				  const sendChannel = await channel.send({
-					embeds: [verifyEmbed],
-					components: [
-					  new ActionRowBuilder().setComponents(
-						new ButtonBuilder().setCustomId('verificar').setLabel('Verificar').setStyle(ButtonStyle.Success),
-					  ),
-					],
-				  });
 				} else {
 				  console.error('Não existe canal de verificação setado,');
 				}

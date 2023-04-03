@@ -1,3 +1,9 @@
+const { EmbedBuilder } = require("discord.js"); // Importa a classe EmbedBuilder da biblioteca discord.js.
+
+module.exports = {
+    // ID do botão
+    id: 'verificar',
+}
 async function client(interaction, role) {
 if (interaction.customId === "verificar") {
     await interaction.deferUpdate();
