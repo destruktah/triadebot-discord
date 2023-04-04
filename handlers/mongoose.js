@@ -1,121 +1,68 @@
-// Importa as bibliotecas necessárias
 const mongoose = require('mongoose');
-const config = require("../config/config.js");
-const colors = require("colors");
+require('dotenv').config();
+mongoose.set('strictQuery', false);
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-
-// Importa alguns comandos personalizados
 const { SetEntrada } = require('../commands/slash/Admin/setentrada.js');
 const { SetSaida } = require("../commands/slash/Admin/setsaida.js");
 const { SetVerificar } = require('../commands/slash/Admin/setverificar.js');
 
-// Configura as variáveis de ambiente
-require('dotenv').config();
 
-// Exporta a função que será usada pelo bot
-module.exports = (client) => {
-	// Conecta-se ao MongoDB
-	console.log("\n" + "[DATABASE🍃] Começou a se conectar ao MongoDB...".brightYellow);
-	const mongo = process.env.MONGODB || config.Handlers.MongoDB;
+module.exports = async (client) => {
+  // Conecta-se ao MongoDB
+  console.log("\n" + "[DATABASE🍃] Começou a se conectar ao MongoDB...".brightYellow);
+  const mongo = process.env.MONGODB;
+  if (!mongo) console.log("[AVISO😨] Mongo URI/URL não foi fornecido! (Não obrigatório)".red);
+  try {
+    await mongoose.connect(mongo, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("[DATABASE🍃] Conectado ao MongoDB com sucesso!".brightGreen);
 
-	if (!mongo) {
-		console.log("[AVISO😨] Mongo URI/URL não foi fornecido! (Não obrigatório)".red);
+    // Executa várias operações em paralelo, aguardando todos os resultados com Promise.all()
+    const [setEntrada, setSaida, setVerificar] = await Promise.all([
+      SetEntrada.findOne(),
+      SetSaida.findOne(),
+      SetVerificar.findOne(),
+    ]);
+
+    // Verifica a última entrada de "SetEntrada" e "SetSaida"
+    if (setEntrada && setEntrada.channelId) console.log(`SetEntrada channel ID: ${setEntrada.channelId}`);
+    else console.error('Canal de entrada não setado');
+    if (setSaida && setSaida.channelId) console.log(`SetSaida channel ID: ${setSaida.channelId}`);
+    else console.error('Canal de saída não está setado.');
+
+    // Verifica a última entrada de "SetVerificar"
+    if (setVerificar?.guildId && setVerificar?.channelId && setVerificar?.roleId) {
+      const { guildId, channelId, roleId } = setVerificar;
+      console.log(`SetVerificar Guild ID: ${guildId}`);
+      console.log(`SetVerificar channel ID: ${channelId}`);
+      console.log(`SetVerificar role ID: ${roleId}`);
+
+      // Procura o objeto "guild" (servidor) correspondente a "setVerificarGuildId"
+      const guild = client.guilds.cache.get(guildId);
+      if (!guild) {
+        console.error(`SetVerificar guild ID "${guildId}" não encontrado na base de dados do bot`);
+        return;
+      }
+
+      // Procura o canal "verificar" correspondente a "setVerificarChannelId"
+      const channel = guild.channels.cache.get(channelId);
+      if (!channel) {
+        console.error(`SetVerificar channel ID "${channelId}" não encontrado na base de dados do bot`);
+        return;
+      }
+
+      // Procura a role "verificar" correspondente a "setVerificarRoleId"
+      const role = guild.roles.cache.get(roleId);
+      if (!role) {
+        console.error(`SetVerificar role ID "${roleId}" não encontrado na base de dados do bot`);
+        return;
+      }
 	} else {
-		mongoose.set('strictQuery', false);
-		mongoose.connect(mongo, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-		}).catch((e) => console.log(e))
-
-		// Quando a conexão é estabelecida, realiza algumas verificações
-		mongoose.connection.once("open", async () => {
-			console.log("[DATABASE🍃] Conectado ao MongoDB com sucesso!".brightGreen);
-			// Verifica o último canal definido para o comando "SetEntrada"
-			try {
-				const latestSetEntrada = await SetEntrada.findOne();
-				if (latestSetEntrada && latestSetEntrada.channelId) {
-					const setEntradaChannelId = latestSetEntrada.channelId;
-					console.log(`SetEntrada channel ID: ${setEntradaChannelId}`);
-				} else {
-					console.error('Cana de entrada não setado');
-				}
-			} catch (err) {
-				console.error('Erro ao recuperar ID do canal SetEntrada do banco de dados', err);
-			}
-
-			// Verifica o último canal definido para o comando "SetSaida"
-			try {
-				const latestSetSaida = await SetSaida.findOne();
-				if (latestSetSaida && latestSetSaida.channelId) {
-					const setSaidaChannelId = latestSetSaida.channelId;
-					console.log(`SetSaida channel ID: ${setSaidaChannelId}`);
-				} else {
-					console.error('Canal de saída não está setado.');
-				}
-			} catch (err) {
-				console.error('Erro ao recuperar o ID do canal SetSaida do banco de dados', err);
-			}
-
-			try {
-				// Procura na base de dados a última entrada de "SetVerificar"
-				const latestSetVerificar = await SetVerificar.findOne();
-			
-				// Verifica se a última entrada existe e se contém informações necessárias (guildId, channelId e roleId)
-				if (latestSetVerificar && latestSetVerificar.guildId && latestSetVerificar.channelId && latestSetVerificar.roleId) {
-					// Extrai as informações necessárias da última entrada de "SetVerificar"
-					const setVerificarGuildId = latestSetVerificar.guildId;
-					const setVerificarChannelId = latestSetVerificar.channelId;
-					const setVerificarRoleId = latestSetVerificar.roleId;
-					const verifiedRole = setVerificarRoleId;
-					module.exports = verifiedRole;
-					console.log(verifiedRole);
-
-					// Imprime no console as informações extraídas
-					console.log(`SetVerificar Guild ID: ${setVerificarGuildId}`)
-					console.log(`SetVerificar channel ID: ${setVerificarChannelId}`);
-					console.log(`SetVerificar role ID: ${setVerificarRoleId}`);
-					
-					// Procura o objeto "guild" (servidor) correspondente a "setVerificarGuildId"
-					const guild = client.guilds.cache.get(setVerificarGuildId);
-			
-					// Verifica se "guild" existe
-					if (guild) {
-						// Procura o objeto "role" (papel) correspondente a "setVerificarRoleId" dentro do servidor "guild"
-						const role = guild.roles.cache.get(setVerificarRoleId);
-		
-						// Verifica se "role" existe
-						if (!role) {
-							console.error(`SetVerificar role ID "${setVerificarRoleId}" não encontrado nas roles do servidor`);
-							return;
-						}
-					} else {
-						console.error(`SetVerificar guild ID "${setVerificarGuildId}" não encontrado na base de dados do bot`);
-						return;
-					}
-			
-					// Procura o objeto "channel" (canal de texto) correspondente a "setVerificarChannelId"
-					const channel = client.channels.cache.get(setVerificarChannelId);
-			
-					// Procura o objeto "role" (papel) correspondente a "setVerificarRoleId" dentro do servidor "guild"
-					const role = guild.roles.cache.get(setVerificarRoleId);
-	
-					// Verifica se "channel" existe
-					if (!channel) {
-						console.error(`SetVerificar channel ID "${setVerificarChannelId}" não encontrado nos canais do servidor`);
-						return;
-					}
-			
-					// Verifica se "role" existe
-					if (!role) {
-						console.error(`SetVerificar role ID "${setVerificarRoleId}" não encontrado nas roles do servidor`);
-						return;
-					}
-				} else {
-				  console.error('Não existe canal de verificação setado,');
-				}
-			} catch (err) {
-				console.error('Erro ao recuperar o ID do canal de verificação e o ID da role do banco de dados', err);
-			  }
-		})
-	}
-}
+		console.error('SetVerificar não configurado corretamente');
+		}	
+	} catch (err) {
+		console.error(`[DATABASE🍃] Erro ao conectar ao MongoDB: ${err}`.brightRed);
+	  }
+    };

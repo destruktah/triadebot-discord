@@ -4,6 +4,7 @@ const { EmbedBuilder, ButtonInteraction  } = require("discord.js"); // Importa a
 
 
 module.exports = { // Exporta um objeto que contém o nome do evento e a função executada quando o evento ocorre.
+  
   name: "buttonListener",
     
 /** 
@@ -36,7 +37,7 @@ module.exports = { // Exporta um objeto que contém o nome do evento e a funçã
       return interaction.reply({ embeds: [ new EmbedBuilder().setDescription( `⛔ | You don't have the required permissions to use this.`).setColor("#f8312f") ], ephemeral: true });
     }
 
-    if (button.developer && interaction.user.id !== "CHANGEME") { // Verifica se o botão é apenas para desenvolvedores e se o usuário que interagiu é um desenvolvedor. Se não, responde com uma mensagem de erro.
+    if (button.developer && interaction.user.id !== "796182619615526912") { // Verifica se o botão é apenas para desenvolvedores e se o usuário que interagiu é um desenvolvedor. Se não, responde com uma mensagem de erro.
       console.log(`O botão ${interaction.customId} é apenas para desenvolvedores e o usuário ${interaction.user.tag} não é um desenvolvedor.`);
       return interaction.reply({ embeds: [ new EmbedBuilder().setDescription( `⛔ | This button is for developers only.`).setColor("#f8312f") ], ephemeral: true });
     }

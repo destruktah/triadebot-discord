@@ -52,7 +52,7 @@ const client = new Client({
     };
 
     // Handler:
-    client.buttons = new Collection();
+    
     client.commands = new Collection();
     client.slash_commands = new Collection();
     client.user_commands = new Collection();
@@ -60,10 +60,10 @@ const client = new Client({
     client.modals = new Collection();
     client.events = new Collection();
     client.aliases = new Collection();
-   
+    client.buttons = new Collection();
+
 module.exports = client; 
 loadButtons(client);
-
 
 ["prefix", "application-commands", "events", "mongoose", "buttonHandler"].forEach((file) => {
     require(`./handlers/${file}`)(client, config);
