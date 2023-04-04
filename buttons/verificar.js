@@ -10,10 +10,10 @@ module.exports = {
 
     const latestSetVerificar = await SetVerificar.findOne();
 			
-				// Verifica se a última entrada existe e se contém informações necessárias (roleId)
-				if (latestSetVerificar && latestSetVerificar.roleId) {
-					// Extrai as informações necessárias da última entrada de "SetVerificar"
-					const setVerificarRoleId = latestSetVerificar.roleId;
+	// Verifica se a última entrada existe e se contém informações necessárias (roleId)
+	if (latestSetVerificar && latestSetVerificar.roleId) {
+	// Extrai as informações necessárias da última entrada de "SetVerificar"
+	const setVerificarRoleId = latestSetVerificar.roleId;
 
     await interaction.deferUpdate();
     
