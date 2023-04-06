@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionsBitField, ApplicationCommandType, ApplicationCommandOptionType, ButtonStyle, ActionRowBuilder, ButtonBuilder, ComponentType } = require('discord.js');
+const { EmbedBuilder, PermissionsBitField, ApplicationCommandType, ApplicationCommandOptionType, ButtonStyle, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const mongoose = require('mongoose');
 
 const setVerificarSchema = new mongoose.Schema({
@@ -20,7 +20,6 @@ const SetVerificar = mongoose.model('SetVerificar', setVerificarSchema);
 
 module.exports = {
   SetVerificar,
-  
   name: "setverificar",
   description: "[🧑‍💻 ADMIN] Seta o canal de verificação",
   type: ApplicationCommandType.ChatInput,
@@ -38,17 +37,12 @@ module.exports = {
       required: true
     }
   ],
-  defaultPermission: false,
-  permissions: [
-    {
-      id: "seu_role_id",
-      type: "ROLE",
-      permission: true
-    }
-  ],
+  permissions: {
+    DEFAULT_MEMBER_PERMISSIONS: "SendMessages"
+  },
 
   run: async (client, interaction, config, db) => {
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+    if (!interaction.member || !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
       return await interaction.reply({ content: "🚫 Tens que ser Administrador para executar este comando", ephemeral: true});
     }
   
@@ -81,15 +75,13 @@ module.exports = {
       .setLabel('Verificar')
       .setStyle(ButtonStyle.Success);
 
-      const sendChannel = await channel.send({
+      channel.send({
         embeds: [verifyEmbed],
         components: [
           new ActionRowBuilder().addComponents(verifyButton),
         ],
       });
       console.log('Mensagem enviada para o canal:');
-      console.log(sendChannel);
-      verifyButton,
-      sendChannel;
+      return interaction.reply({ content: 'Canal de verificação setado com sucesso', ephemeral: true })
   }
 };

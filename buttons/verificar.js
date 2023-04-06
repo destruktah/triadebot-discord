@@ -1,7 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const { SetVerificar } = require('../commands/slash/Admin/setverificar.js');
 
-
 module.exports = {
   
   id: 'verificar',

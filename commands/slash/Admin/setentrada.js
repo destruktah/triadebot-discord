@@ -1,13 +1,17 @@
-const { EmbedBuilder, PermissionsBitField, ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
+const { PermissionsBitField, ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
 const mongoose = require('mongoose');
 
 const setEntradaSchema = new mongoose.Schema({
-    channelId: {
-      type: String,
-      required: true
-    }
-  });
-  
+  guildId: {
+    type: String,
+    required: true
+  },
+  channelId: {
+    type: String,
+    required: true
+  }
+});
+
 const SetEntrada = mongoose.model('SetEntrada', setEntradaSchema);
 
 module.exports = {
@@ -16,25 +20,26 @@ module.exports = {
   description: "[🧑‍💻 ADMIN] Seta o canal de entrada",
   type: ApplicationCommandType.ChatInput,
   options: [
-      { 
-          name: "canal",
-          description: "escolhe um canal para ser setado",
-          type: ApplicationCommandOptionType.Channel,
-          required: true
-      }
+    { 
+      name: "canal",
+      description: "escolhe um canal para ser setado",
+      type: ApplicationCommandOptionType.Channel,
+      required: true
+    }
   ],
   permissions: {
-      DEFAULT_MEMBER_PERMISSIONS: "SendMessages"
+    DEFAULT_MEMBER_PERMISSIONS: "SendMessages"
   },
-  
   run: async (client, interaction, config, db) => {
     if (!interaction.member || !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        return await interaction.reply({ content: "🚫 Tens que ser Administrador para executar este comando", ephemeral: true});
+      return await interaction.reply({ content: "🚫 Tens que ser Administrador para executar este comando", ephemeral: true});
     }  
+    
     const { options } = interaction;
     const channel = options.getChannel('canal');
+    const guildId = interaction.guildId;
     
-    const existingSetEntrada = await SetEntrada.findOne();
+    const existingSetEntrada = await SetEntrada.findOne({ guildId: guildId });
     if (existingSetEntrada) {
       return interaction.reply({ content: 'Já há um canal de verificação definido. Para definires outro apaga a setagem primeiro', ephemeral: true });
     }
@@ -47,7 +52,7 @@ module.exports = {
     const channelId = channel.id; 
     console.log(`ID do canal de entrada: ${channelId}`);
   
-    const setEntrada = new SetEntrada({ channelId });
+    const setEntrada = new SetEntrada({ guildId: guildId, channelId: channelId });
     await setEntrada.save();
   
     console.log('Canal de boas vindas setado com sucesso');

@@ -13,6 +13,7 @@ const client = new Client({
         Events.GuildRoleUpdate,
         Events.GuildMemberAdd,
         Events.GuildMemberRemove,
+        Events.InteractionCreate,
     ],
     intents: [
 

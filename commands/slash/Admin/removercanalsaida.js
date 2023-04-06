@@ -25,19 +25,19 @@ module.exports = {
 
     const { options } = interaction;
     const channel = options.getChannel('canal');
-    const latestSetSaida = await SetSaida.findOne();
+    const latestSetSaida = await SetSaida.findOne({ guildId: interaction.guildId }); // Recupera o SetSaida correspondente ao servidor atual
 
-    if (!channel || channel.id !== latestSetSaida.channelId) {
-        const embed2 = new EmbedBuilder()
-          .setColor("BLUE")
-          .setDescription(":x: Não foi possível remover o canal, certifique-se que menciona o canal que está definido como canal de saida.");
-        return interaction.reply({ embeds: [embed2.toJSON()], ephemeral: true });
+    if (!latestSetSaida || channel.id !== latestSetSaida.channelId) {
+      const embed2 = new EmbedBuilder()
+      .setColor('DarkRed')
+      .setDescription(":x: Não foi possível remover o canal, certifique-se que menciona o canal que está definido como canal de entrada.");
+    return interaction.reply({ embeds: [embed2.toJSON()], ephemeral: true });
     }
 
-    await SetSaida.deleteOne();
+    await SetSaida.deleteOne({ guildId: interaction.guildId }); // Remove o SetSaida correspondente ao servidor atual
     const embed = new EmbedBuilder()
-      .setColor("BLUE")
-      .setDescription(":white_check_mark: O teu canal de saida foi removido.");
-    return interaction.reply({ embeds: [embed.toJSON()], ephemeral: true });
+    .setColor('DarkGreen')
+    .setDescription(":white_check_mark: O teu canal de entrada foi removido.");
+  return interaction.reply({ embeds: [embed.toJSON()], ephemeral: true });
   },
 };

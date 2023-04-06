@@ -10,6 +10,7 @@ const config = require("../../config/config.js");
 // Cria uma nova instância de QuickDB para ser usada como um banco de dados
 const db = new QuickDB();
 
+const { InteractionType } = require('discord.js');
 // Exporta um objeto com o nome "interactionCreate" (usado em outros arquivos)
 module.exports = {
    name: "interactionCreate"
@@ -57,6 +58,22 @@ client.on('interactionCreate', async (interaction) => {
         try {
             // Executa o comando com o cliente, a interação, a configuração e o banco de dados
             command.run(client, interaction, config, db);
+        } catch (e) {
+            console.error(e)
+        };
+    };
+
+    if (interaction.type == InteractionType.ModalSubmit) { // MessageCommmad:
+        console.log('utilizador pressionou o botao enviar do formulario')
+        const { modals } = client;
+        const { customId } = interaction;
+        const modal = modals.get(customId);
+        
+        if (!modal) return new Error("Nao existe codigo para este modal.");
+
+        try {
+            await modal.run(client, interaction, config, db);
+            console.log(modal);
         } catch (e) {
             console.error(e)
         };
