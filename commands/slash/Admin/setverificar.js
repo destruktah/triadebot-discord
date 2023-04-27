@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionsBitField, ApplicationCommandType, ApplicationCommandOptionType, ButtonStyle, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { EmbedBuilder, PermissionsBitField, ApplicationCommandType, ButtonStyle, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const mongoose = require('mongoose');
 
 const setVerificarSchema = new mongoose.Schema({
@@ -20,23 +20,23 @@ const SetVerificar = mongoose.model('SetVerificar', setVerificarSchema);
 
 module.exports = {
   SetVerificar,
-  name: "setverificar",
-  description: "[🧑‍💻 ADMIN] Seta o canal de verificação",
+  name: "painel-verificar",
+  description: "[🧑‍💻 ADMIN] Sistema de verificação",
   type: ApplicationCommandType.ChatInput,
-  options: [
-    { 
-      name: "canal",
-      description: "Escolhe um canal para ser setado",
-      type: ApplicationCommandOptionType.Channel,
-      required: true
-    },
-    {
-      name: "cargo",
-      description: "Menciona o cargo que irá receber os usuários verificados",
-      type: ApplicationCommandOptionType.Role,
-      required: true
-    }
-  ],
+  // options: [
+  //   { 
+  //     name: "canal",
+  //     description: "Escolhe um canal para ser setado",
+  //     type: ApplicationCommandOptionType.Channel,
+  //     required: true
+  //   },
+  //   {
+  //     name: "cargo",
+  //     description: "Menciona o cargo que irá receber os usuários verificados",
+  //     type: ApplicationCommandOptionType.Role,
+  //     required: true
+  //   }
+  // ],
   permissions: {
     DEFAULT_MEMBER_PERMISSIONS: "SendMessages"
   },
@@ -63,8 +63,9 @@ module.exports = {
     console.log(`ID do canal de verificação: ${channelId}`);
     console.log(`ID do cargo de usuários verificados: ${roleId}`);
   
-    await SetVerificar.findOneAndUpdate({}, { guildId, channelId, roleId }, { upsert: true });
-  
+    const setVerificar = new SetVerificar({ guildId: guildId, channelId: channelId, roleId: roleId });
+    await setVerificar.save();
+    
     const verifyEmbed = new EmbedBuilder()
       .setTitle("Verificação")
       .setDescription('Clica no botão abaixo para verificar a tua conta e conseguires acesso ao servidor')

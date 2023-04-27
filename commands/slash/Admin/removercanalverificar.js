@@ -25,7 +25,7 @@ module.exports = {
 
     const { options } = interaction;
     const channel = options.getChannel('canal');
-    const latestSetVerificar = await SetVerificar.findOne();
+    const latestSetVerificar = await SetVerificar.findOne({ guildId: interaction.guildId });
 
     if (!channel || channel.id !== latestSetVerificar.channelId) {
         const embed2 = new EmbedBuilder()
@@ -34,7 +34,7 @@ module.exports = {
         return interaction.reply({ embeds: [embed2.toJSON()], ephemeral: true });
     }
 
-    await SetVerificar.deleteOne();
+    await SetVerificar.deleteOne({ guildId: interaction.guildId });
     const embed = new EmbedBuilder()
       .setColor(0x000FF)
       .setDescription(":white_check_mark: O teu canal de verificao foi removido.");

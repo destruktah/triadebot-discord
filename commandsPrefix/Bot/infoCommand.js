@@ -5,6 +5,14 @@ module.exports = {
     config: {
         name: "info",
         description: "[🤖 BOT] info!",
+        suboptions: [
+            {
+                name: "help", description: "ajuda"
+            },
+            {
+                name: "info", description: "info"
+            }
+        ]
     },
     permissions: ['SendMessages'],
     owner: false,

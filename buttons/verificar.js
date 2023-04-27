@@ -7,7 +7,9 @@ module.exports = {
 
   async execute(interaction) {
 
-    const latestSetVerificar = await SetVerificar.findOne();
+    
+    const guildId = interaction.guildId;
+    const latestSetVerificar = await SetVerificar.findOne({ guildId: guildId });
 			
 	// Verifica se a última entrada existe e se contém informações necessárias (roleId)
 	if (latestSetVerificar && latestSetVerificar.roleId) {

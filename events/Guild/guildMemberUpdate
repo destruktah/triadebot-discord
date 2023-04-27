@@ -1,0 +1,235 @@
+// Importar as dependências necessárias
+const { EmbedBuilder } = require('discord.js');
+const client = require("../../index");
+const config = require("../../config/config.js");
+const mongoose = require('mongoose');
+const { Hierarquia } = require('../../commands/slash/Admin/hierarquia.js');
+
+module.exports = {
+  name: "guildMemberUpdate"
+};
+
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
+  
+  const hierarquia = await Hierarquia.findOne({ guildId: newMember.guild.id });
+  const guild = client.guilds.cache.get(newMember.guild.id);
+
+  if (
+    hierarquia.LideresRoleId.some((roleId) => oldMember.roles.cache.has(roleId)) ||
+    hierarquia.GerentesRoleId.some((roleId) => oldMember.roles.cache.has(roleId)) ||
+    hierarquia.TacticosRoleId.some((roleId) => oldMember.roles.cache.has(roleId)) ||
+    hierarquia.MembrosRoleId.some((roleId) => oldMember.roles.cache.has(roleId))
+  ) {
+    console.log("Usuário pertence à hierarquia");
+  
+    // Obter o nome do cargo antigo e novo
+    const oldRoles = oldMember.roles.cache.map(role => role.id);
+    const newRoles = newMember.roles.cache.map(role => role.id);
+    const removedRoles = oldRoles.filter(role => !newRoles.includes(role));
+    const addedRoles = newRoles.filter(role => !oldRoles.includes(role));
+  
+    let promotionMessage = '';
+  
+      if (addedRoles.length > 0) {
+        const roleName = newMember.guild.roles.cache.get(addedRoles[0]).name;
+        const userMention = newMember.toString();
+        
+        // Verificar se o usuário ainda tem cargos e se eles são superiores ao cargo adicionado
+        const hasSuperiorRole = (
+          newRoles.some(role => hierarquia.LideresRoleId.includes(role)) ||
+          newRoles.some(role => hierarquia.GerentesRoleId.includes(role)) ||
+          newRoles.some(role => hierarquia.TacticosRoleId.includes(role))
+        );
+      
+        if (!hasSuperiorRole) {
+          promotionMessage += `🎉 ${userMention} foi promovido a **${roleName}** 🎉\n\n`;
+      
+          const fields = [
+            {
+              name: "Líderes",
+              value: hierarquia.LideresRoleId.map(roleId => {
+                const role = guild.roles.cache.get(roleId);
+                const members = role.members.map(member => member.toString());
+                return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+              }).join('\n')
+            },
+            {
+              name: "Gerentes",
+              value: hierarquia.GerentesRoleId.map(roleId => {
+                const role = guild.roles.cache.get(roleId);
+                const members = role.members.map(member => member.toString());
+                return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+              }).join('\n')
+            },
+            {
+              name: "Táticos",
+              value: hierarquia.TacticosRoleId.map(roleId => {
+                const role = guild.roles.cache.get(roleId);
+                const members = role.members.map(member => member.toString());
+                return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+              }).join('\n')
+            },
+            {
+              name: "Membros",
+              value: hierarquia.MembrosRoleId.map(roleId => {
+                const role = guild.roles.cache.get(roleId);
+                const members = role.members.map(member => member.toString());
+                return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+              }).join('\n')
+            }
+          ];
+          
+          const embed = new EmbedBuilder()
+            .setColor("#0099ff")
+            .setTitle(`Hierarquia`)
+            .setDescription(promotionMessage)
+            .addFields(fields);
+        
+          // Enviar a mensagem embed para o canal específico da hierarquia
+          const channel = newMember.guild.channels.cache.get(hierarquia.channelId);
+          if (channel) {
+            //channel.bulkDelete();
+            console.log("Enviando mensagem de promoção/despromoção");
+            await channel.send({ embeds: [embed] });
+          }
+      }
+    }
+    
+    if (removedRoles.length > 0) {
+      const roleName = oldMember.guild.roles.cache.get(removedRoles[0]).name;
+      const userMention = newMember.toString();
+      
+      // Verificar se o usuário ainda tem cargos e se eles são superiores ao cargo removido
+      const remainingRoles = newRoles.filter(role => !removedRoles.includes(role));
+      const hasSuperiorRole = (
+        remainingRoles.some(role => hierarquia.LideresRoleId.includes(role)) ||
+        remainingRoles.some(role => hierarquia.GerentesRoleId.includes(role)) ||
+        remainingRoles.some(role => hierarquia.TacticosRoleId.includes(role))
+      );
+    
+      if (!hasSuperiorRole) {
+        promotionMessage += `😔 ${userMention} foi despromovido de **${roleName}** 😔\n\n`;
+    
+        // Verificar se o usuário deixou de ter cargos da hierarquia
+        const hasHierarquiaRoles = (
+          hierarquia.LideresRoleId.some((roleId) =>  oldMember.roles.cache.has(roleId)) ||
+          hierarquia.GerentesRoleId.some((roleId) => oldMember.roles.cache.has(roleId)) ||
+          hierarquia.TacticosRoleId.some((roleId) => oldMember.roles.cache.has(roleId)) ||
+          hierarquia.MembrosRoleId.some((roleId) => oldMember.roles.cache.has(roleId))
+        );
+      
+        if (!hasHierarquiaRoles) {
+          promotionMessage += `👋 ${userMention} deixou de fazer parte da familia. 👋\n\n`;
+        };
+      } else return;
+
+      const fields = [
+        {
+          name: "Líderes",
+          value: hierarquia.LideresRoleId.map(roleId => {
+            const role = guild.roles.cache.get(roleId);
+            const members = role.members.map(member => member.toString());
+            return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+          }).join('\n')
+        },
+        {
+          name: "Gerentes",
+          value: hierarquia.GerentesRoleId.map(roleId => {
+            const role = guild.roles.cache.get(roleId);
+            const members = role.members.map(member => member.toString());
+            return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+          }).join('\n')
+        },
+        {
+          name: "Táticos",
+          value: hierarquia.TacticosRoleId.map(roleId => {
+            const role = guild.roles.cache.get(roleId);
+            const members = role.members.map(member => member.toString());
+            return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+          }).join('\n')
+        },
+        {
+          name: "Membros",
+          value: hierarquia.MembrosRoleId.map(roleId => {
+            const role = guild.roles.cache.get(roleId);
+            const members = role.members.map(member => member.toString());
+            return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+          }).join('\n')
+        }
+      ];
+      
+      const embed = new EmbedBuilder()
+        .setColor("#0099ff")
+        .setTitle(`Hierarquia`)
+        .setDescription(promotionMessage)
+        .addFields(fields);
+    
+      // Enviar a mensagem embed para o canal específico da hierarquia
+      const channel = newMember.guild.channels.cache.get(hierarquia.channelId);
+      if (channel) {
+        //channel.bulkDelete();
+        console.log("Enviando mensagem de promoção/despromoção");
+        await channel.send({ embeds: [embed] });
+      }
+    }
+
+  } else {
+    const newRoles = newMember.roles.cache.map(role => role.id);
+    const oldRoles = oldMember.roles.cache.map(role => role.id);
+    const addedRoles = newRoles.filter(role => !oldRoles.includes(role));
+    const roleName = newMember.guild.roles.cache.get(addedRoles[0]).name;
+    const userMention = newMember.toString();
+    let promotionMessage = '';
+    
+    promotionMessage += `🎉 ${userMention} entrou na familia e agora é **${roleName}**! 🎉\n\n`;
+    const fields = [
+      {
+        name: "Líderes",
+        value: hierarquia.LideresRoleId.map(roleId => {
+          const role = guild.roles.cache.get(roleId);
+          const members = role.members.map(member => member.toString());
+          return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+        }).join('\n')
+      },
+      {
+        name: "Gerentes",
+        value: hierarquia.GerentesRoleId.map(roleId => {
+          const role = guild.roles.cache.get(roleId);
+          const members = role.members.map(member => member.toString());
+          return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+        }).join('\n')
+      },
+      {
+        name: "Táticos",
+        value: hierarquia.TacticosRoleId.map(roleId => {
+          const role = guild.roles.cache.get(roleId);
+          const members = role.members.map(member => member.toString());
+          return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+        }).join('\n')
+      },
+      {
+        name: "Membros",
+        value: hierarquia.MembrosRoleId.map(roleId => {
+          const role = guild.roles.cache.get(roleId);
+          const members = role.members.map(member => member.toString());
+          return `${role.name}: ${members.length > 0 ? members.join(', ') : 'Nenhum'}`;
+        }).join('\n')
+      }
+    ];
+  
+  const embed = new EmbedBuilder()
+    .setColor("#0099ff")
+    .setTitle(`Hierarquia`)
+    .setDescription(promotionMessage)
+    .addFields(fields);
+
+  // Enviar a mensagem embed para o canal específico da hierarquia
+  const channel = newMember.guild.channels.cache.get(hierarquia.channelId);
+  if (channel) {
+    //channel.bulkDelete();
+    console.log("Enviando mensagem de entrada na familia");
+    await channel.send({ embeds: [embed] });
+  }
+  console.log ('nao pertencia e agora pertençe');
+}
+}); 

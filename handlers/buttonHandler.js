@@ -1,44 +1,38 @@
+// Importa as bibliotecas fs, path e colors.
 const fs = require('fs');
 const path = require('path');
-const ascii = require('ascii-table');
+const colors = require('colors');
 
-async function loadButtons(client) {
-  // Cria uma nova instância de ascii-table com o título "Buttons List"
-  const table = new ascii('Buttons List');
-  
-  // Obtém o caminho completo da pasta "buttons"
-  const buttonsFolder = path.join(__dirname, '../buttons');
+// Exporta uma função que recebe dois parâmetros: o objeto client e o objeto config.
+module.exports = (client, config) => {
 
-  // Lê o conteúdo da pasta "buttons"
-  const files = await fs.promises.readdir(buttonsFolder);
+    // Imprime uma mensagem no console informando que o Button Handler está sendo iniciado.
+    console.log('\n' + '[BOTÃO🔘] Button Handler:'.blue);
 
-  // Filtra os arquivos que terminam com ".js"
-  const jsFiles = files.filter((file) => file.endsWith('.js'));
+    // Obtendo o caminho completo da pasta "buttons"
+    const buttonsFolderPath = path.join(__dirname, '..', 'buttons');
 
-  // Itera sobre cada arquivo retornado pela função readdir
-  jsFiles.forEach((file) => {
-    // Obtém o caminho completo do arquivo
-    const filePath = path.join(buttonsFolder, file);
+    // Lendo os arquivos da pasta "buttons"
+    fs.readdirSync(buttonsFolderPath).forEach(file => {
 
-    // Importa o botão definido em cada arquivo
-    const button = require(filePath);
+        // Importando o arquivo
+        const button = require(path.join(buttonsFolderPath, file));
 
-    // Se o botão não tiver um ID, retorna
-    if (!button.id) return;
+        // Verifica se o módulo possui um nome especificado na sua configuração.
+        if (button.id) {
 
-    // Adiciona o botão ao mapa de botões do cliente com a chave sendo o ID do botão
-    client.buttons.set(button.id, button);
+            // Adiciona o módulo ao objeto de botões do cliente, usando o nome especificado na configuração como chave.
+            client.buttons.set(button.id, button);
 
-    // Define as colunas da tabela
-    table.setHeading('Button ID', 'Status');
+            // Imprime uma mensagem no console informando que o arquivo foi carregado com sucesso.
+            console.log(`┕[HANDLER - BOTÃO🔘] Carregou um arquivo: ${button.id} (#${client.buttons.size})`.brightGreen);
 
-    // Adiciona uma nova linha à tabela com o ID do botão e uma mensagem de sucesso
-    table.addRow(`${button.id}`, '🟩 Success');
+        } else {
 
-    // Exibe o nome do arquivo que foi carregado
-    console.log(`Loaded button file: ${file}`);
-    console.log(table.toString());
-    
-  })
-}
-module.exports = loadButtons ;
+            // Imprime uma mensagem no console informando que o arquivo não foi carregado devido à falta do valor do nome do módulo na sua configuração.
+            console.log(`┕[HANDLER - BOTÃO🔘] Não foi possível carregar o arquivo ${file}, faltando o valor do nome do módulo.`.red);
+        }
+    });
+};
+
+
